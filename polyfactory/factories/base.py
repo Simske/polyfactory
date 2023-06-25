@@ -226,6 +226,7 @@ class BaseFactory(ABC, Generic[T]):
     An integer to seed the factory's Faker and Random instances with.
     This attribute can be used to control random generation.
     """
+    __batch_size__ : Callable[[], int] = lambda: __random__.randint(1, 10)
 
     # cached attributes
     _fields_metadata: list[FieldMeta]
@@ -672,7 +673,7 @@ class BaseFactory(ABC, Generic[T]):
             factory = cls._get_or_create_factory(model=field_meta.type_args[0])
             if isinstance(field_build_parameters, Sequence):
                 return [factory.build(**field_parameters) for field_parameters in field_build_parameters]
-            return factory.batch(size=cls.__random__.randint(1, 10))
+            return factory.batch(size=cls.__batch_size__())
 
         if field_meta.children:
             return handle_complex_type(field_meta=field_meta, factory=cls)
